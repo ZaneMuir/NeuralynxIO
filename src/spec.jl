@@ -1,6 +1,6 @@
 # define the data block struct and constructor.
 
-abstract type AbstractNRDBlock end
+abstract type AbstractNRDBlock <: Any end
 
 macro make_nrd_block(name, configs...)
     _io = gensym()
