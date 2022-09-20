@@ -1,53 +1,53 @@
+# define the data block struct and constructor.
+
 abstract type AbstractNRDBlock end
 
 macro make_nrd_block(name, configs...)
-    # @show name
-    
     _io = gensym()
     _field_list = []
     _field_parser = []
-    
+
     for item in configs
         _f_name, _f_type, _f_size = if length(item.args) == 2
             (item.args..., 1)
         else
             item.args
         end
-        
+
         if _f_size == 1
             push!(_field_list, :($(_f_name)::$(_f_type)))
         else
             push!(_field_list, :($(_f_name)::Vector{$(_f_type)}))
         end
-        
+
         push!(_field_parser, :(read_and_parse!($(esc(_io)), $(_f_type), $(_f_size))))
     end
-    # @show _field_list
-    
+
     quote
         struct $(esc(name)) <: AbstractNRDBlock
             $(_field_list...)
         end
-        
-        $(esc(name))($(esc(_io))::IOStream) = $(esc(name))($(_field_parser...))
+
+        $(esc(name))($(esc(_io))::IO) = $(esc(name))($(_field_parser...))
     end
 end
 
+# read NTuple{N, dtype} from io
 function read_and_parse!(io, dtype, N)
     _buf = read(io, sizeof(dtype) * N)
-    
+
     _val = if N == 1
         _val = reinterpret(dtype, _buf) |> collect
         _val[1]
     else
         reinterpret(dtype, _buf) |> collect
     end
-    
+
     _val
 end
 
 @make_nrd_block(NRDHeader,
-    (header, UInt8, 16384))
+    (header, UInt8, 16384)) # 16k
 
 @make_nrd_block(CSCBlock,
     (qwTimeStamp, UInt64, 1),
@@ -92,7 +92,7 @@ These files end in the NCS extension.
 
 - `qwTimeStamp::UInt64`: Cheetah timestamp for this record. This corresponds to the sample time for the first data point in the snSamples array. This value is in microseconds.
 - `dwChannelNumber::UInt32`: The channel number for this record. This is NOT the A/D channel number.
-- `dwSampleFreq::UInt32`: The sampling frequency (Hz) for the data stored in the snSamples Field in this record. 
+- `dwSampleFreq::UInt32`: The sampling frequency (Hz) for the data stored in the snSamples Field in this record.
 - `dwNumValidSamples::UInt32`: Number of values in snSamples containing valid data.
 - `snSamples::Int16[512]`: Data points for this record. Cheetah currently supports 512 data points per record. At this time, the snSamples array is a [512] array.
 """

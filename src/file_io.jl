@@ -1,31 +1,51 @@
+# common structure for Neuralynx files
 struct NRDFile{T <: AbstractNRDBlock}
-    filepath::String
+    filename::String
     header::NRDHeader
     data::Vector{T}
+
+    NRDFile(::Type{T}, filename::AbstractString) = begin
+        open(filename) do fio
+            _header = NRDHeader(fio)
+            _data = T[]
+            while !eof(fio)
+                push!(_data, T(fio))
+            end
+            new{T}(filename, _header, _data)
+        end
+    end
 end
 
 const NCSFile = NRDFile{CSCBlock}
 const NEVFile = NRDFile{EventBlock}
 
-function load(f::String)
-    _, _ext = splitext(f)
+function load_neuralynx_file(filename::AbstractString; kwargs...)
+    _, _ext = splitext(filename)
     if lowercase(_ext) == ".ncs"
-        load(f, NCSFile)
+        load_neuralynx_ncs(filename; kwargs...)
     elseif lowercase(_ext) == ".nev"
-        load(f, NEVFile)
+        load_neuralynx_nev(filename; kwargs...)
     else
-        @error("unknown file format: $(_ext)")
+        @error("file format ($(_ext)) is not currently supported.")
     end
 end
 
-function load(f::String, ::Type{NRDFile{T}}) where {T <: AbstractNRDBlock}
-    open(f) do fio
-        _header = NRDHeader(fio)
-        _data = T[]
-        while !eof(fio)
-            push!(_data, T(fio))
-        end
-        NRDFile{T}(f, _header, _data)
+function load_neuralynx_header(filename::AbstractString)
+    _header = open(filename) do fio
+        NRDHeader(fio)
     end
-
+    parse_header(_header)
 end
+
+function parse_header(header::NRDHeader)
+    _raw = String(copy(header.header))
+    _entries = filter(x->!isempty(x), split(strip(_raw, '\0'), "\r\n")[2:end])
+
+    map(x->begin
+        _k, _v = split(x, " ", limit=2)
+        String(_k[2:end]) => String(strip(replace(_v, "\""=>""), ' '))
+        end, _entries) |> Dict
+end
+
+include("io_ncs.jl")
+include("io_nev.jl")
