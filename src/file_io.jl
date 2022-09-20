@@ -4,14 +4,14 @@ struct NRDFile{T <: AbstractNRDBlock}
     header::NRDHeader
     data::Vector{T}
 
-    NRDFile(::Type{T}, filename::AbstractString) = begin
+    NRDFile{T}(filename::AbstractString) where {T <: AbstractNRDBlock} = begin
         open(filename) do fio
             _header = NRDHeader(fio)
             _data = T[]
             while !eof(fio)
                 push!(_data, T(fio))
             end
-            new{T}(filename, _header, _data)
+            new(filename, _header, _data)
         end
     end
 end
