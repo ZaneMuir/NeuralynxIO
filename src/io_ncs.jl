@@ -5,7 +5,7 @@
 end
 
 function load_neuralynx_ncs(filename::AbstractString; mode::LOAD_MODE_NCS=LOAD_MODE_NCS_RAW)
-    raw = NRDFile(CSCBlock, filename)
+    raw = NRDFile{CSCBlock}(filename)
 
     if mode == LOAD_MODE_NCS_RAW
         raw
