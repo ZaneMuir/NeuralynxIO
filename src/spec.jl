@@ -59,26 +59,6 @@ end
 @make_nrd_block(NRDHeader,
     (header, UInt8, 16384)) # 16k
 
-@make_nrd_block(CSCBlock,
-    (qwTimeStamp, UInt64, 1),
-    (dwChannelNumber, UInt32, 1),
-    (dwSampleFreq, UInt32, 1),
-    (dwNumValidSamples, UInt32, 1),
-    (snSamples, Int16, 512))
-
-@make_nrd_block(EventBlock,
-    (nstx, Int16, 1),
-    (npkt_id, Int16, 1),
-    (npkt_data_size, Int16, 1),
-    (qwTimeStamp, UInt64, 1),
-    (nevent_id, Int16, 1),
-    (nttl, Int16, 1),
-    (ncrc, Int16, 1),
-    (ndummy1, Int16, 1),
-    (ndummy2, Int16, 1),
-    (dnExtra, Int32, 8),
-    (EventString, UInt8, 128))
-
 @doc raw"""
 # File Header
 
@@ -94,16 +74,4 @@ NOTE: `NeuroView` actually uses the data in the header!
 """
 NRDHeader
 
-@doc raw"""
-# Continuously Sampled Record
 
-Storage format for continuously sampled channel (CSC) recorded data.
-These files end in the NCS extension.
-
-- `qwTimeStamp::UInt64`: Cheetah timestamp for this record. This corresponds to the sample time for the first data point in the snSamples array. This value is in microseconds.
-- `dwChannelNumber::UInt32`: The channel number for this record. This is NOT the A/D channel number.
-- `dwSampleFreq::UInt32`: The sampling frequency (Hz) for the data stored in the snSamples Field in this record.
-- `dwNumValidSamples::UInt32`: Number of values in snSamples containing valid data.
-- `snSamples::Int16[512]`: Data points for this record. Cheetah currently supports 512 data points per record. At this time, the snSamples array is a [512] array.
-"""
-CSCBlock

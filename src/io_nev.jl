@@ -1,3 +1,16 @@
+@make_nrd_block(EventBlock,
+    (nstx, Int16, 1),
+    (npkt_id, Int16, 1),
+    (npkt_data_size, Int16, 1),
+    (qwTimeStamp, UInt64, 1),
+    (nevent_id, Int16, 1),
+    (nttl, Int16, 1),
+    (ncrc, Int16, 1),
+    (ndummy1, Int16, 1),
+    (ndummy2, Int16, 1),
+    (dnExtra, Int32, 8),
+    (EventString, UInt8, 128))
+
 @enum LOAD_MODE_NEV begin
     LOAD_MODE_NEV_RAW
     LOAD_MODE_NEV_BIT_TIMESTAMPS
@@ -5,8 +18,10 @@
     LOAD_MODE_NEV_STRING_TIMESTAMPS
 end
 
+const NEVFile = NRDFile{EventBlock}
+
 function load_neuralynx_nev(filename::AbstractString; mode::LOAD_MODE_NEV=LOAD_MODE_NEV_RAW, bit_event::Integer=0, byte_event::Integer=0, string_event::String="")
-    raw = NRDFile{EventBlock}(filename)
+    raw = NEVFile(filename)
     if mode == LOAD_MODE_NEV_RAW
         raw
     elseif mode == LOAD_MODE_NEV_BIT_TIMESTAMPS

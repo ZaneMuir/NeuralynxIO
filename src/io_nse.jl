@@ -12,8 +12,10 @@
     LOAD_MODE_NSE_WAVEFORM
 end
 
+const NSEFile = NRDFile{NSEBlock}
+
 function load_neuralynx_nse(filename::AbstractString; mode::LOAD_MODE_NSE=LOAD_MODE_NSE_RAW)
-    raw = NRDFile{NSEBlock}(filename)
+    raw = NSEFile(filename)
     if mode == LOAD_MODE_NSE_RAW
         raw
     elseif mode == LOAD_MODE_NSE_TIMESTAMPS

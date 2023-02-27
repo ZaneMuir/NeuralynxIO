@@ -16,15 +16,14 @@ struct NRDFile{T <: AbstractNRDBlock}
     end
 end
 
-const NCSFile = NRDFile{CSCBlock}
-const NEVFile = NRDFile{EventBlock}
-
 function load_neuralynx_file(filename::AbstractString; kwargs...)
     _, _ext = splitext(filename)
     if lowercase(_ext) == ".ncs"
         load_neuralynx_ncs(filename; kwargs...)
     elseif lowercase(_ext) == ".nev"
         load_neuralynx_nev(filename; kwargs...)
+    elseif lowercase(_ext) == ".nse"
+        load_neuralynx_nse(filename; kwargs...)
     else
         @error("file format ($(_ext)) is not currently supported.")
     end
