@@ -32,6 +32,16 @@ macro make_nrd_block(name, configs...)
     end
 end
 
+function read(io::IO, ::Type{T}) where {T <: AbstractNRDBlock}
+    T(io)
+end
+
+function write(io::IO, block::T) where {T <: AbstractNRDBlock}
+    for key in fieldnames(T)
+        write(io, getfield(block, key))
+    end
+end
+
 # read NTuple{N, dtype} from io
 function read_and_parse!(io, dtype, N)
     _buf = read(io, sizeof(dtype) * N)
