@@ -6,13 +6,17 @@ struct NRDFile{T <: AbstractNRDBlock}
 
     NRDFile{T}(filename::AbstractString) where {T <: AbstractNRDBlock} = begin
         open(filename) do fio
-            _header = NRDHeader(fio)
-            _data = T[]
-            while !eof(fio)
-                push!(_data, T(fio))
-            end
-            new(filename, _header, _data)
+            NRDFile{T}(filename, fio)
         end
+    end
+
+    NRDFile{T}(name::AbstractString, fio::IO) where {T <: AbstractNRDBlock} = begin
+        _header = NRDHeader(fio)
+        _data = T[]
+        while !eof(fio)
+            push!(_data, T(fio))
+        end
+        new(name, _header, _data)
     end
 end
 

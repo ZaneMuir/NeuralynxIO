@@ -44,7 +44,7 @@ end
 
 # read NTuple{N, dtype} from io
 function read_and_parse!(io, dtype, N)
-    _buf = read(io, sizeof(dtype) * N)
+    _buf = Base.read(io, sizeof(dtype) * N)
 
     _val = if N == 1
         _val = reinterpret(dtype, _buf) |> collect
